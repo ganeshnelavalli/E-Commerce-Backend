@@ -96,6 +96,11 @@ CORS_ALLOWED_ORIGINS = [
     "https://e-commerce-frontend-sp7j.onrender.com"
 ]
 
+# Additional CORS settings for production
+CORS_ALLOW_ALL_ORIGINS = False  # Don't enable this in production
+CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+
 
 # # ✅ CORS
 # CORS_ALLOW_CREDENTIALS = True
