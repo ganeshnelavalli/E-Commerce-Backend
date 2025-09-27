@@ -148,7 +148,14 @@ def logout_view(request):
 
 
 # ---------------- Session Check ----------------
+from django.views.decorators.csrf import ensure_csrf_cookie
+
+@ensure_csrf_cookie
 def session_view(request):
+    if request.method == 'OPTIONS':
+        response = JsonResponse({})
+        return response
+        
     return JsonResponse({
         "is_authenticated": request.user.is_authenticated,
         "is_admin": request.user.is_authenticated and request.user.is_staff,
