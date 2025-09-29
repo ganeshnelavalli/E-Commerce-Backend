@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$c#vr(hdywxyt%_p#d5zq9b2ok57q5qvo+&bzfcr0g$(_0ln18'
 DEBUG = True
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['e-commerce-backend-3ccf.onrender.com', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -83,10 +83,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_DOMAIN = '.onrender.com'  # Allow cookies across subdomains
 
 # ✅ CSRF
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = [
+    "https://e-commerce-frontend-sp7j.onrender.com"
+]
+
+# ✅ CORS Settings
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -95,9 +101,29 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5174",
     "https://e-commerce-frontend-sp7j.onrender.com"
 ]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Additional CORS settings for production
 CORS_ALLOW_ALL_ORIGINS = False  # Don't enable this in production
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 
