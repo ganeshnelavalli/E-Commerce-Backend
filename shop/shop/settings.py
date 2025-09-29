@@ -83,7 +83,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_DOMAIN = '.onrender.com'  # Allow cookies across subdomains
+SESSION_COOKIE_DOMAIN = None  # Let Django handle this automatically
+SESSION_COOKIE_NAME = 'sessionid'  # Default Django session cookie name
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 
 # ✅ CSRF
 CSRF_COOKIE_SAMESITE = 'None'
