@@ -22,6 +22,9 @@ urlpatterns = [
     path('api/admin/stats/', views.admin_stats, name='admin_stats'),
     path('api/me/', views.me, name='me'),
     path('api/change-password/', views.change_password, name='change_password'),
+    # Google OAuth
+    path('api/google-auth/', views.google_auth, name='google_auth'),
+    path('api/google-config/', views.google_config, name='google_config'),
     # Admin-only
     path('api/admin/users/', views.admin_users, name='admin_users'),
     path('api/admin/users/<int:user_id>/', views.admin_user_detail, name='admin_user_detail'),

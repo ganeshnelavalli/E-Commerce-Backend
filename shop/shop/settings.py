@@ -7,6 +7,10 @@ DEBUG = True
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 ALLOWED_HOSTS = ['e-commerce-backend-3ccf.onrender.com', 'localhost', '127.0.0.1']
 
+# Google OAuth Configuration
+GOOGLE_OAUTH2_CLIENT_ID = '656780283871-lu97oh71lnmu02e0phn9ra3huda1sa2c.apps.googleusercontent.com'
+GOOGLE_OAUTH2_CLIENT_SECRET = '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'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

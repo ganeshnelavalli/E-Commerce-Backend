@@ -80,6 +80,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Cart, Products, CartItem
+from django.conf import settings
+import requests
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 # ---------------- Home ----------------
 def home(request):
     return render(request, 'website/index.html')
@@ -467,3 +471,117 @@ def change_password(request):
         return JsonResponse({"success": True})
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+
+# ---------------- Google OAuth Authentication ----------------
+@csrf_exempt
+def google_auth(request):
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+    
+    try:
+        data = json.loads(request.body)
+        id_token_google = data.get('id_token')
+        
+        if not id_token_google:
+            return JsonResponse({"success": False, "error": "Google ID token required"}, status=400)
+        
+        # Handle both direct user info and ID token verification
+        try:
+            # Try to parse as direct user info first (from OAuth2 flow)
+            if id_token_google.startswith('{'):
+                user_info = json.loads(id_token_google)
+                google_id = user_info.get('sub', user_info.get('id', ''))
+                email = user_info.get('email')
+                name = user_info.get('name', '')
+                first_name = user_info.get('given_name', '')
+                last_name = user_info.get('family_name', '')
+                picture = user_info.get('picture', '')
+            else:
+                # Verify the Google ID token (traditional flow)
+                idinfo = id_token.verify_oauth2_token(
+                    id_token_google, 
+                    google_requests.Request(), 
+                    settings.GOOGLE_OAUTH2_CLIENT_ID
+                )
+                
+                # Extract user information
+                google_id = idinfo['sub']
+                email = idinfo['email']
+                name = idinfo.get('name', '')
+                first_name = idinfo.get('given_name', '')
+                last_name = idinfo.get('family_name', '')
+                picture = idinfo.get('picture', '')
+                
+        except (ValueError, json.JSONDecodeError) as e:
+            return JsonResponse({"success": False, "error": "Invalid Google token or user data"}, status=400)
+        
+        # Check if user exists by email
+        try:
+            user = User.objects.get(email=email)
+            # User exists, log them in
+            auth_login(request, user)
+            request.session.save()
+            
+            return JsonResponse({
+                "success": True,
+                "message": "Login successful",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "is_admin": user.is_staff,
+                }
+            })
+            
+        except User.DoesNotExist:
+            # User doesn't exist, create new account
+            # Generate username from email if not provided
+            username = email.split('@')[0]
+            counter = 1
+            original_username = username
+            
+            # Ensure username is unique
+            while User.objects.filter(username=username).exists():
+                username = f"{original_username}{counter}"
+                counter += 1
+            
+            # Create new user
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                password=None  # No password for OAuth users
+            )
+            
+            # Log the user in
+            auth_login(request, user)
+            request.session.save()
+            
+            return JsonResponse({
+                "success": True,
+                "message": "Account created and login successful",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "is_admin": user.is_staff,
+                }
+            })
+            
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@csrf_exempt
+def google_config(request):
+    """Return Google OAuth configuration for frontend"""
+    return JsonResponse({
+        "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
+        "success": True
+    })
